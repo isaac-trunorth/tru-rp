@@ -1,0 +1,12 @@
+[package]
+name = "trurp-app"
+version = "0.1.0"
+authors = ["Isaac Eiter <eiter@trunorth-automation.com>"]
+edition = "2021"
+publish = false
+
+[workspace]
+members = [".", "backend", "entity", "migration"]
+
+[dependencies]
+backend = { path = "backend" }
