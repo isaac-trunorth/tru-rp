@@ -16,14 +16,13 @@ A resource management tool for TruNorth.
 
 # Next
 
-- Add date of work to time entry
-- users:
-    - add manager id
-    - add role
 - get timelogs:
     - get by week end date
     - get by employee id
     - get by manager id
+- update timelogs:
+    - Manager to approval (exclusive endpoint?)
+    - User to update their own
 - figure out error messages
 
 # Tips

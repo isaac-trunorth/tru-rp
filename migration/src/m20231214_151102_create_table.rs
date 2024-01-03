@@ -17,7 +17,6 @@ enum TimeEntries {
     WorkCode,
     EmployeeId,
     DateOfWork,
-    WeekEndDate,
     HoursWorked,
     SubmitStatus,
 }
@@ -65,7 +64,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(TimeEntries::WorkCode).integer().not_null())
                     .col(ColumnDef::new(TimeEntries::EmployeeId).integer().not_null())
                     .col(ColumnDef::new(TimeEntries::DateOfWork).date().not_null())
-                    .col(ColumnDef::new(TimeEntries::WeekEndDate).date().not_null())
                     .col(ColumnDef::new(TimeEntries::HoursWorked).float().not_null())
                     .col(
                         ColumnDef::new(TimeEntries::SubmitStatus)
