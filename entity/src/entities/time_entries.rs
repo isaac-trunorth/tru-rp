@@ -14,6 +14,7 @@ pub struct Model {
     pub job_description: String,
     pub work_code: i32,
     pub employee_id: i32,
+    pub date_of_work: Date,
     pub week_end_date: Date,
     #[sea_orm(column_type = "Float")]
     pub hours_worked: f32,

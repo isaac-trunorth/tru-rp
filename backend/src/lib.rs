@@ -15,7 +15,11 @@ use routes::{
         get_timelogs::get_all_timelogs,
         update_timelogs::{mark_completed, mark_uncompleted, update_timelog},
     },
-    users::{create_user::create_user, login::login, logout::logout},
+    users::{
+        create_user::{create_manager, create_user, assign_manager},
+        login::login,
+        logout::logout,
+    },
 };
 
 mod app_state;
@@ -58,6 +62,8 @@ fn create_router(app_state: AppState) -> Router {
         .route("/timelogs/:timelog_id", patch(update_timelog))
         .route("/timelogs/:timelog_id", delete(soft_delete_timelog))
         .route("/users", post(create_user))
+        .route("/users/setmanager", post(assign_manager))
+        .route("/managers", post(create_manager))
         .route("/users/login", post(login))
         .route_layer(from_extractor::<RequireAuth>())
         .with_state(app_state)
