@@ -8,7 +8,7 @@ use sea_orm_migration::{
 pub struct Migration;
 
 #[derive(DeriveIden)]
-enum Users {
+pub enum Users {
     Users,
     Id,
     ManagerId,

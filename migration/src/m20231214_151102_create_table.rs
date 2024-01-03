@@ -3,6 +3,7 @@ use sea_orm_migration::{
     sea_orm::{EnumIter, Iterable},
     sea_query::extension::postgres::Type,
 };
+use super::m20231213_151102_create_table::Users;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;

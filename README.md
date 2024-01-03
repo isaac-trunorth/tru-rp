@@ -16,7 +16,6 @@ A resource management tool for TruNorth.
 
 # Next
 
-- Fix file structure
 - Add date of work to time entry
 - users:
     - add manager id

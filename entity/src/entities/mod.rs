@@ -3,6 +3,6 @@
 pub mod prelude;
 
 pub mod managers;
-pub mod users;
+pub mod sea_orm_active_enums;
 pub mod time_entries;
-mod sea_orm_active_enums;
+pub mod users;
