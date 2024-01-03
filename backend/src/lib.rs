@@ -1,12 +1,25 @@
 use std::{env, net::SocketAddr};
 
 use app_state::AppState;
+use auth::RequireAuth;
+use axum::{
+    middleware::from_extractor,
+    routing::{delete, get, patch, post, put},
+    Router,
+};
 use migration::{sea_orm::Database, Migrator, MigratorTrait};
-use router::create_router;
+use routes::{
+    timelogs::{
+        create_timelog::create_timelog,
+        delete_timelogs::soft_delete_timelog,
+        get_timelogs::get_all_timelogs,
+        update_timelogs::{mark_completed, mark_uncompleted, update_timelog},
+    },
+    users::{create_user::create_user, login::login, logout::logout},
+};
 
 mod app_state;
 mod auth;
-mod router;
 mod routes;
 mod utilities;
 
@@ -33,4 +46,19 @@ pub async fn start() {
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
+}
+
+fn create_router(app_state: AppState) -> Router {
+    Router::new()
+        .route("/users/logout", post(logout))
+        .route("/timelogs", post(create_timelog))
+        .route("/timelogs", get(get_all_timelogs))
+        .route("/timelogs/:timelog_id/completed", put(mark_completed))
+        .route("/timelogs/:timelog_id/uncompleted", put(mark_uncompleted))
+        .route("/timelogs/:timelog_id", patch(update_timelog))
+        .route("/timelogs/:timelog_id", delete(soft_delete_timelog))
+        .route("/users", post(create_user))
+        .route("/users/login", post(login))
+        .route_layer(from_extractor::<RequireAuth>())
+        .with_state(app_state)
 }
