@@ -12,11 +12,11 @@ A resource management tool for TruNorth.
 # Starting
 
 - `podman machine start && podman start f3e4ae0f7156`
-- `podman start --all` or maybe `podman start f3e4ae0f7156`
+- `podman start --all` to get the id, then `podman start f3e4ae0f7156` where f3... is the id
 
 # Next
 
-- get timelogs:
+- get timelogs: (Add tests)
     - get by week end date
     - get by employee id
     - get by manager id

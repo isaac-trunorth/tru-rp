@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 
 pub enum ErrorEnum {
     Auth,
+    UserNotFound,
 }
 
 pub struct AppError {

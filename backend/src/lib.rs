@@ -12,11 +12,11 @@ use routes::{
     timelogs::{
         create_timelog::create_timelog,
         delete_timelogs::soft_delete_timelog,
-        get_timelogs::get_all_timelogs,
-        update_timelogs::{mark_completed, mark_uncompleted, update_timelog},
+        get_timelogs::{get_all_timelogs, get_initial_by_date},
+        update_timelogs::{mark_approved, mark_initial, update_timelog},
     },
     users::{
-        create_user::{create_manager, create_user, assign_manager},
+        create_user::{assign_manager, create_manager, create_user},
         login::login,
         logout::logout,
     },
@@ -25,6 +25,7 @@ use routes::{
 mod app_state;
 mod auth;
 mod routes;
+mod service;
 mod utilities;
 
 #[tokio::main]
@@ -57,8 +58,9 @@ fn create_router(app_state: AppState) -> Router {
         .route("/users/logout", post(logout))
         .route("/timelogs", post(create_timelog))
         .route("/timelogs", get(get_all_timelogs))
-        .route("/timelogs/:timelog_id/completed", put(mark_completed))
-        .route("/timelogs/:timelog_id/uncompleted", put(mark_uncompleted))
+        .route("/timelogs/:user_id/by_date", get(get_initial_by_date))
+        .route("/timelogs/:timelog_id/approved", put(mark_approved))
+        .route("/timelogs/:user_id/initial", get(get_initial_by_date))
         .route("/timelogs/:timelog_id", patch(update_timelog))
         .route("/timelogs/:timelog_id", delete(soft_delete_timelog))
         .route("/users", post(create_user))
