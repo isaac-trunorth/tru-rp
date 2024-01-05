@@ -58,7 +58,7 @@ fn create_router(app_state: AppState) -> Router {
         .route("/users/logout", post(logout))
         .route("/timelogs", post(create_timelog))
         .route("/timelogs", get(get_all_timelogs))
-        .route("/timelogs/:user_id/by_date", get(get_initial_by_date))
+        .route("/timelogs/:user_id/by_date", put(mark_initial))
         .route("/timelogs/:timelog_id/approved", put(mark_approved))
         .route("/timelogs/:user_id/initial", get(get_initial_by_date))
         .route("/timelogs/:timelog_id", patch(update_timelog))

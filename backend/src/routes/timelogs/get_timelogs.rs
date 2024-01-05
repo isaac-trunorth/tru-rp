@@ -5,7 +5,7 @@ use axum::{
 };
 use chrono::NaiveDate;
 use entity::time_entries;
-use migration::sea_orm::{ColumnTrait, EntityTrait, QueryFilter, QueryOrder};
+use migration::sea_orm::{EntityTrait, QueryOrder};
 
 pub async fn get_all_timelogs(state: State<AppState>) -> Json<Vec<time_entries::Model>> {
     let logs = time_entries::Entity::find()
