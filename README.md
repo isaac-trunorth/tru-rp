@@ -17,7 +17,6 @@ A resource management tool for TruNorth.
 # Next
 
 - update timelogs:
-    - Manager to approval (exclusive endpoint?)
     - User to update their own
 - figure out error messages
 
