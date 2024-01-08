@@ -1,31 +1,49 @@
 use chrono::{Datelike, Duration, NaiveDate, Weekday};
-use entity::time_entries;
+use entity::{dto::TimelogRequest, sea_orm_active_enums::Status, time_entries};
+use migration::sea_orm::sea_query::Expr;
 use migration::sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, QueryOrder};
+use migration::Alias;
 
 // todo: Add test for begin/end date
-pub async fn get_by_date(
-    user_id: i32,
-    date: NaiveDate,
-    status: Option<entity::sea_orm_active_enums::Status>,
+pub async fn get_timelogs(
+    filters: &TimelogRequest,
     db: &DatabaseConnection,
 ) -> Vec<entity::time_entries::Model> {
-    let mut logs =
-        time_entries::Entity::find().filter(time_entries::Column::EmployeeId.eq(user_id));
+    let mut logs = time_entries::Entity::find();
 
-    // filter by status if requested
-    if let Some(status) = status {
-        logs = logs.filter(time_entries::Column::SubmitStatus.eq(status));
+    // add the optional filters
+    if let Some(user_id) = &filters.user_id {
+        logs = logs.filter(time_entries::Column::EmployeeId.eq(user_id));
+    }
+    if let Some(manager_id) = &filters.user_id {
+        logs = logs.filter(time_entries::Column::EmployeeId.eq(manager_id));
+    }
+    if let Some(status) = &filters.status {
+        logs = logs.filter(time_entries::Column::SubmitStatus.eq(*status));
     };
-
-    let (begin_date, end_date) = get_date_range(date);
+    if let Some(date) = filters.week_end_date {
+        let (begin_date, end_date) = get_date_range(date);
+        logs = logs.filter(time_entries::Column::DateOfWork.between(begin_date, end_date));
+    }
 
     let logs = logs
-        .filter(time_entries::Column::DateOfWork.between(begin_date, end_date))
         .order_by_asc(time_entries::Column::DateOfWork)
         .all(db)
         .await
         .unwrap();
     logs
+}
+
+pub async fn mark_approved(db: &DatabaseConnection, ids: Vec<i32>) {
+    time_entries::Entity::update_many()
+        .col_expr(
+            time_entries::Column::SubmitStatus,
+            Expr::value(Status::Approved).cast_as(Alias::new("Status")),
+        )
+        .filter(time_entries::Column::Id.is_in(ids))
+        .exec(db)
+        .await
+        .expect("update failed");
 }
 
 fn get_date_range(date: NaiveDate) -> (NaiveDate, NaiveDate) {

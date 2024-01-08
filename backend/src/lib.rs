@@ -12,7 +12,7 @@ use routes::{
     timelogs::{
         create_timelog::create_timelog,
         delete_timelogs::soft_delete_timelog,
-        get_timelogs::{get_all_timelogs, get_initial_by_date},
+        get_timelogs::get_timelogs,
         update_timelogs::{mark_approved, mark_initial, update_timelog},
     },
     users::{
@@ -57,10 +57,9 @@ fn create_router(app_state: AppState) -> Router {
     Router::new()
         .route("/users/logout", post(logout))
         .route("/timelogs", post(create_timelog))
-        .route("/timelogs", get(get_all_timelogs))
+        .route("/timelogs", get(get_timelogs))
         .route("/timelogs/:user_id/by_date", put(mark_initial))
-        .route("/timelogs/:timelog_id/approved", put(mark_approved))
-        .route("/timelogs/:user_id/initial", get(get_initial_by_date))
+        .route("/timelogs/approve", put(mark_approved))
         .route("/timelogs/:timelog_id", patch(update_timelog))
         .route("/timelogs/:timelog_id", delete(soft_delete_timelog))
         .route("/users", post(create_user))
