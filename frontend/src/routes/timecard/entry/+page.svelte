@@ -1,1 +1,5 @@
-<h1 class="font-bold text-l">Time Entry</h1>
+<script lang="ts">
+	import TimeEntry from '$lib/components/TimeEntry.svelte';
+</script>
+
+<svelte:component this={TimeEntry} />

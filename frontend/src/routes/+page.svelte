@@ -1,13 +1,12 @@
 <script lang="ts">
-	import Navbar from '$lib/components/navbar.svelte';
-	import { goto } from '$app/navigation';
+	import TimeEntry from '$lib/components/TimeEntry.svelte';
+	import ManagerReview from '$lib/components/ManagerReview.svelte';
+	import NavButton from '$lib/components/NavButton.svelte';
 
-	const routeToTime = () => routeToPage('timecard/entry', false);
-	const routeToReview = () => routeToPage('timecard/review', false);
-	function routeToPage(route: string, replaceState: boolean): null {
-		goto(`/${route}`, { replaceState });
-		return null;
-	}
+	let selected = TimeEntry;
+
+	const routeToTime = () => (selected = TimeEntry);
+	const routeToReview = () => (selected = ManagerReview);
 </script>
 
 <div>
@@ -15,12 +14,18 @@
 	<div class="columns-2">
 		<div class="break-after-column">
 			<div class="pl-5">
-				<button on:click={routeToTime}>Time Entry</button>
-				<button on:click={routeToReview}>Manager Review</button>
+				<ul class="list-none space-y-2">
+					<li>
+						<NavButton onClick={() => routeToTime()} label="Time Entry" />
+					</li>
+					<li>
+						<NavButton onClick={() => routeToReview()} label="Manager Review" />
+					</li>
+				</ul>
 			</div>
 		</div>
 		<div>
-			<p>Page content</p>
+			<svelte:component this={selected} />
 		</div>
 	</div>
 </div>
