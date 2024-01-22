@@ -13,9 +13,9 @@ pub async fn get_timelogs(
 
     // add the optional filters
     if let Some(user_id) = &filters.user_id {
-        logs = logs.filter(time_entries::Column::EmployeeId.eq(user_id));
+        logs = logs.filter(time_entries::Column::EmployeeId.eq(*user_id));
     }
-    if let Some(manager_id) = &filters.user_id {
+    if let Some(manager_id) = &filters.manager_id {
         logs = logs.filter(time_entries::Column::EmployeeId.eq(manager_id));
     }
     if let Some(status) = &filters.status {

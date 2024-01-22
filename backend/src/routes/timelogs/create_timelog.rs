@@ -13,7 +13,6 @@ pub async fn create_timelog(
         .map(|mdl| {
             let mut actv = mdl.to_owned().into_active_model();
             actv.id = NotSet;
-            println!("id: {:?}", actv.employee_id);
             actv
         })
         .collect::<Vec<time_entries::ActiveModel>>();

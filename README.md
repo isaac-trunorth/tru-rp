@@ -8,6 +8,7 @@ A resource management tool for TruNorth.
 - Install [podman](https://podman.io/docs/installation)
 - Install [Rust](https://www.rust-lang.org/tools/install)
 - Install [PGAdmin4](https://www.pgadmin.org/download/pgadmin-4-windows/)
+- Install npm in the wsl environment
 
 # Starting
 
@@ -16,8 +17,8 @@ A resource management tool for TruNorth.
 
 # Next
 
-- update timelogs:
-    - User to update their own
+- update timelogs
+- delete timelogs
 - figure out error messages
 
 # Tips

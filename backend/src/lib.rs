@@ -13,7 +13,7 @@ use routes::{
         create_timelog::create_timelog,
         delete_timelogs::soft_delete_timelog,
         get_timelogs::get_timelogs,
-        update_timelogs::{mark_approved, mark_initial, update_timelog},
+        update_timelogs::{mark_approved, update_timelog},
     },
     users::{
         create_user::{assign_manager, create_manager, create_user},
@@ -21,6 +21,7 @@ use routes::{
         logout::logout,
     },
 };
+use tower_http::cors::CorsLayer;
 
 mod app_state;
 mod auth;
@@ -55,17 +56,17 @@ pub async fn start() {
 
 fn create_router(app_state: AppState) -> Router {
     Router::new()
-        .route("/users/logout", post(logout))
         .route("/timelogs", post(create_timelog))
-        .route("/timelogs", get(get_timelogs))
-        .route("/timelogs/:user_id/by_date", put(mark_initial))
+        .route("/timelogs", put(update_timelog))
+        .route("/timelogs", delete(soft_delete_timelog))
+        .route("/timelogs/:user_id", get(get_timelogs))
         .route("/timelogs/approve", put(mark_approved))
-        .route("/timelogs/:timelog_id", patch(update_timelog))
-        .route("/timelogs/:timelog_id", delete(soft_delete_timelog))
         .route("/users", post(create_user))
+        .route("/users/login", post(login))
+        .route("/users/logout", post(logout))
         .route("/users/setmanager", post(assign_manager))
         .route("/managers", post(create_manager))
-        .route("/users/login", post(login))
         .route_layer(from_extractor::<RequireAuth>())
         .with_state(app_state)
+        .layer(CorsLayer::permissive())
 }

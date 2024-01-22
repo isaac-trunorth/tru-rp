@@ -10,9 +10,9 @@
 </script>
 
 <div>
-	<h1 class="text-center text-3xl font-bold underline">TruNorth Automation</h1>
-	<div class="columns-2">
-		<div class="break-after-column">
+	<h1 class="text-center text-3xl font-bold underline font-arial">TruNorth Automation</h1>
+	<div class="columns-2 flex">
+		<div class="break-after-column m-2 w-fit">
 			<div class="pl-5">
 				<ul class="list-none space-y-2">
 					<li>
