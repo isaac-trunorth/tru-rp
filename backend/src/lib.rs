@@ -9,6 +9,7 @@ use axum::{
 };
 use migration::{sea_orm::Database, Migrator, MigratorTrait};
 use routes::{
+    projects::create_project::create_project,
     timelogs::{
         create_timelog::create_timelog,
         delete_timelogs::soft_delete_timelog,
@@ -56,6 +57,7 @@ pub async fn start() {
 
 fn create_router(app_state: AppState) -> Router {
     Router::new()
+        .route("/projects", post(create_project))
         .route("/timelogs", post(create_timelog))
         .route("/timelogs", put(update_timelog))
         .route("/timelogs", delete(soft_delete_timelog))
