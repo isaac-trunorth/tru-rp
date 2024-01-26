@@ -13,3 +13,13 @@ pub enum Status {
     #[sea_orm(string_value = "Submitted")]
     Submitted,
 }
+#[derive(Debug, Copy, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum, Serialize, Deserialize)]
+#[sea_orm(rs_type = "String", db_type = "Enum", enum_name = "work_codes")]
+pub enum WorkCodes {
+    #[sea_orm(string_value = "Checkout")]
+    Checkout,
+    #[sea_orm(string_value = "Meetings")]
+    Meetings,
+    #[sea_orm(string_value = "SoftwareDev")]
+    SoftwareDev,
+}

@@ -27,8 +27,18 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Projects::JobNumber).integer().not_null())
-                    .col(ColumnDef::new(Projects::JobDescription).string().not_null())
+                    .col(
+                        ColumnDef::new(Projects::JobNumber)
+                            .integer()
+                            .unique_key()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(Projects::JobDescription)
+                            .string()
+                            .unique_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Projects::JobActive).boolean().not_null())
                     .to_owned(),
             )

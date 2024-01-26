@@ -4,12 +4,14 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
 #[sea_orm(table_name = "projects")]
+#[serde(rename_all = "camelCase")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
+    #[sea_orm(unique)]
     pub job_number: i32,
+    #[sea_orm(unique)]
     pub job_description: String,
     pub job_active: bool,
 }
