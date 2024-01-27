@@ -1,8 +1,4 @@
-use sea_orm_migration::{
-    prelude::*,
-    sea_orm::{EnumIter, Iterable},
-    sea_query::extension::postgres::Type,
-};
+use sea_orm_migration::prelude::*;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -14,13 +10,7 @@ pub enum Users {
     ManagerId,
     Name,
     Password,
-}
-
-#[derive(DeriveIden)]
-enum Managers {
-    Managers,
-    Id,
-    UserId,
+    AccessLevel,
 }
 
 #[async_trait::async_trait]
@@ -38,30 +28,18 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Users::ManagerId).integer())
+                    .col(ColumnDef::new(Users::ManagerId).integer().not_null())
                     .col(ColumnDef::new(Users::Name).string().unique_key().not_null())
                     .col(ColumnDef::new(Users::Password).string().not_null())
-                    .to_owned(),
-            )
-            .await?;
-
-        manager
-            .create_table(
-                Table::create()
-                    .table(Managers::Managers)
-                    .if_not_exists()
                     .col(
-                        ColumnDef::new(Managers::Id)
-                            .integer()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key(),
+                        ColumnDef::new(Users::AccessLevel)
+                            .small_integer()
+                            .not_null(),
                     )
-                    .col(ColumnDef::new(Managers::UserId).integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk-managers-user_id")
-                            .from(Managers::Managers, Managers::UserId)
+                            .name("fk-users-manager_id")
+                            .from(Users::Users, Users::ManagerId)
                             .to(Users::Users, Users::Id),
                     )
                     .to_owned(),
@@ -73,13 +51,10 @@ impl MigrationTrait for Migration {
         manager
             .drop_foreign_key(
                 ForeignKey::drop()
-                    .table(Managers::Managers)
-                    .name("fk-managers-user_id")
+                    .table(Users::Users)
+                    .name("fk-users-manager_id")
                     .to_owned(),
             )
-            .await?;
-        manager
-            .drop_table(Table::drop().table(Managers::Managers).to_owned())
             .await?;
         manager
             .drop_table(Table::drop().table(Users::Users).to_owned())

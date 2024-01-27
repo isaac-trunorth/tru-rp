@@ -17,7 +17,7 @@ use routes::{
         update_timelogs::{mark_approved, update_timelog},
     },
     users::{
-        create_user::{assign_manager, create_manager, create_user},
+        create_user::{assign_manager, create_user},
         login::login,
         logout::logout,
     },
@@ -68,7 +68,6 @@ fn create_router(app_state: AppState) -> Router {
         .route("/users/login", post(login))
         .route("/users/logout", post(logout))
         .route("/users/setmanager", post(assign_manager))
-        .route("/managers", post(create_manager))
         .route_layer(from_extractor::<RequireAuth>())
         .with_state(app_state)
         .layer(CorsLayer::permissive())

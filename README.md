@@ -17,8 +17,8 @@ A resource management tool for TruNorth.
 
 # Next
 
-- update timelogs
-- delete timelogs
+- figure out auth
+- get managers employees
 - figure out error messages
 
 # Tips

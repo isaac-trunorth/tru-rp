@@ -2,7 +2,6 @@
 
 pub mod prelude;
 
-pub mod managers;
 pub mod projects;
 pub mod sea_orm_active_enums;
 pub mod time_entries;
