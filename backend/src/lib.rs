@@ -16,11 +16,7 @@ use routes::{
         get_timelogs::get_timelogs,
         update_timelogs::{mark_approved, update_timelog},
     },
-    users::{
-        create_user::{assign_manager, create_user},
-        login::login,
-        logout::logout,
-    },
+    users::{assign_manager, create_user, login, logout},
 };
 use tower_http::cors::CorsLayer;
 
@@ -69,6 +65,7 @@ fn create_router(app_state: AppState) -> Router {
         .route("/users/logout", post(logout))
         .route("/users/setmanager", post(assign_manager))
         .route_layer(from_extractor::<RequireAuth>())
+        .route("/login", post(login))
         .with_state(app_state)
         .layer(CorsLayer::permissive())
 }

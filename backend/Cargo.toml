@@ -25,3 +25,5 @@ validator = { version = "0.16.0", features = ["derive"] }
 async-trait = "0.1.75"
 tower-http = { version = "0.5.0", features = ["cors"] }
 futures = "0.3.30"
+sha2 = "0.10.8"
+base64ct = { version = "1.6.0", features = ["std"] }
