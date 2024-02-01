@@ -1,7 +1,11 @@
-use axum::{extract::State, Json};
+use axum::{
+    extract::{path, Path, State},
+    Json,
+};
 use entity::users;
 use migration::sea_orm::{
-    ActiveModelTrait, ActiveValue::NotSet, ActiveValue::Set, EntityTrait, IntoActiveModel,
+    ActiveModelTrait, ActiveValue::NotSet, ActiveValue::Set, ColumnTrait, EntityTrait,
+    IntoActiveModel, QueryFilter,
 };
 
 use crate::{
@@ -42,7 +46,10 @@ pub async fn create_user(
     Ok(new_user.into())
 }
 pub async fn login(state: State<AppState>, Json(payload): Json<users::Model>) -> String {
-    let from_db = users::Entity::find_by_id(payload.id).one(&state.db).await;
+    let from_db = users::Entity::find()
+        .filter(users::Column::Name.eq(payload.name))
+        .one(&state.db)
+        .await;
     if from_db.is_err() {
         return "User not found".into();
     };
@@ -60,3 +67,20 @@ pub async fn login(state: State<AppState>, Json(payload): Json<users::Model>) ->
     }
 }
 pub async fn logout() {}
+
+pub async fn get_users(state: State<AppState>) -> Json<Vec<users::Model>> {
+    let users = users::Entity::find().all(&state.db).await.unwrap();
+    users.into()
+}
+
+pub async fn get_users_by_manager(
+    state: State<AppState>,
+    Path(manager_id): Path<i32>,
+) -> Json<Vec<users::Model>> {
+    let users = users::Entity::find()
+        .filter(users::Column::ManagerId.eq(manager_id))
+        .all(&state.db)
+        .await
+        .unwrap();
+    users.into()
+}

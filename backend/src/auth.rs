@@ -49,6 +49,7 @@ fn token_is_valid(token: &str) -> Result<(), String> {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct Claims {
     user_id: i32,
     access_level: i16,
