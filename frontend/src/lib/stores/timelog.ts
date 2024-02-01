@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 import { submitTimelogs, getTimeLogs } from "../api/timelog";
-import { TimeCardRow, type TimeEntry, type TimeCardStore, convertTimeEntries, } from "$lib/model/timelogs";
+import { TimeCardRow, type TimeEntry, type TimeCardStore, convertTimeEntries, Status, } from "$lib/model/timelogs";
+import type { Token } from "$lib/model/users";
 
 const { subscribe, set, update } = writable<TimeCardStore>([]);
 
@@ -21,17 +22,18 @@ export const timelogStore = {
         });
         return countTotalHours(data!);
     },
-    getNewLogs: async (user: number) => {
-        const newLogs = await getTimeLogs(user);
+    getNewLogs: async (auth: Token, user?: number) => {
+        if (!user) user = auth.userId;
+        const newLogs = await getTimeLogs(user, auth);
         set(convertTimeEntries(newLogs));
     },
-    submitLogs: (user: number) => {
+    submitLogs: async (auth: Token) => {
         let data: TimeCardStore;
         update(dataUser => {
             data = dataUser;
             return dataUser;
         });
-        submitTimelogs(data!, user);
+        await submitTimelogs(data!, auth);
     },
     addLog: (newLog: TimeCardRow) => {
         update(data => {
@@ -39,13 +41,15 @@ export const timelogStore = {
             return data;
         });
     },
-    removeLog: async (log: TimeCardRow, user: number) => {
+    removeLog: async (log: TimeCardRow, auth: Token) => {
         log.entries.forEach((entry) => {
-            entry.info.hoursWorked = 0;
-            entry.UpdateStatus();
+            if (entry.info.submitStatus != Status.Approved) {
+                entry.info.hoursWorked = 0;
+                entry.UpdateStatus();
+            }
         });
-        submitTimelogs([log], user);
-        const newLogs = await getTimeLogs(user);
+        submitTimelogs([log], auth);
+        const newLogs = await getTimeLogs(auth.userId, auth);
         set(convertTimeEntries(newLogs));
     }
 }

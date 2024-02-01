@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Status, TimeCardRow, UiStatus } from '$lib/model/timelogs';
+	import { Status, TimeCardRow, UiStatus, WorkCode } from '$lib/model/timelogs';
 	import { timelogStore } from '$lib/stores/timelog';
 	import { userStore } from '$lib/stores/user';
 	import { getDate, getMonday } from '$lib/utilities/utilities';
@@ -7,6 +7,7 @@
 	import { projects } from '$lib/stores/projects';
 	import { WorkCodesIndexer } from '$lib/model/general';
 	import Modal from './modal.svelte';
+	import { notificationStore } from '$lib/stores/notifications';
 
 	let showModal = false;
 
@@ -28,30 +29,34 @@
 		);
 
 	onMount(async () => {
+		await projects.getProjects($userStore);
 		await timelogStore.getNewLogs($userStore);
 	});
 
 	function monitor(projectName: string) {
-		const nextProject = projects.filter((row) => row.name == projectName)[0];
+		const nextProject = $projects.filter(
+			(row) => `${row.jobNumber} - ${row.jobDescription}` == projectName
+		)[0];
 		if (nextProject == undefined) return;
-		if (nextProject.name != 'Add project' && projects.includes(nextProject)) {
+		if (nextProject.jobDescription != 'Add project' && $projects.includes(nextProject)) {
 			timelogStore.addLog(
-				new TimeCardRow(nextProject.name, {
+				new TimeCardRow({
 					date: monday,
-					projectNumber: nextProject.id,
-					workCode: 0
+					projectId: nextProject.id,
+					workCode: WorkCode.Unset
 				})
 			);
 			newProject = 'Add project';
 		}
 	}
 
-	function removeRow(row: TimeCardRow) {
-		timelogStore.removeLog(row, $userStore);
+	async function removeRow(row: TimeCardRow) {
+		await timelogStore.removeLog(row, $userStore);
+		notificationStore.addNew('Logs removed');
 	}
 	function addRow(row: TimeCardRow) {
-		const { date, projectNumber } = row.key;
-		const newRow = new TimeCardRow(row.name, { date, projectNumber, workCode: 0 });
+		const { date, projectId } = row.key;
+		const newRow = new TimeCardRow({ date, projectId, workCode: WorkCode.Unset });
 		timelogStore.addLog(newRow);
 	}
 	async function finalHourSubmission() {
@@ -64,6 +69,7 @@
 			});
 		});
 		await timelogStore.submitLogs($userStore);
+		notificationStore.addNew('Submission successfull', 1000);
 		showModal = false;
 	}
 </script>
@@ -89,7 +95,9 @@
 					on:mouseenter={() => (showButtons = true)}
 					on:mouseleave={() => (showButtons = false)}
 				>
-					{row.name}
+					{`${$projects.filter((proj) => proj.id == row.key.projectId)[0].jobNumber} - ${
+						$projects.filter((proj) => proj.id == row.key.projectId)[0].jobDescription
+					}`}
 					{#if showButtons}
 						<button
 							on:click={() => addRow(row)}
@@ -102,13 +110,17 @@
 					{/if}
 				</td>
 				<td class="border border-slate-800">
-					{#if row.key.workCode > 0}
-						{WorkCodesIndexer[row.key.workCode]}
+					{#if row.key.workCode != WorkCode.Unset && row.key.workCode.toString() != ''}
+						{row.key.workCode}
 					{:else}
-						<input bind:value={row.key.workCode} list="workCodes" />
+						<input
+							bind:value={row.key.workCode}
+							on:click={() => (row.key.workCode = WorkCode[''])}
+							list="workCodes"
+						/>
 						<datalist id="workCodes">
 							{#each WorkCodesIndexer as workOption}
-								<option value={WorkCodesIndexer.indexOf(workOption)}>{workOption}</option>
+								<option>{workOption}</option>
 							{/each}
 						</datalist>
 					{/if}
@@ -124,7 +136,7 @@
 							/>
 						{:else}
 							<input
-								class="bg-green-200"
+								class="bg-green-200 w-12"
 								disabled={true}
 								bind:value={row.entries[i].info.hoursWorked}
 							/>
@@ -152,8 +164,8 @@
 				/>
 				<datalist id="projects">
 					<option>Add project</option>
-					{#each projects as project}
-						<option>{project.name}</option>
+					{#each $projects as project}
+						<option>{project.jobNumber} - {project.jobDescription}</option>
 					{/each}
 				</datalist></td
 			>
@@ -162,10 +174,16 @@
 	</table>
 	<button
 		class="border hover:border-black p-1 bg-slate-200 hover:bg-transparent rounded m-2"
-		on:click={() => timelogStore.submitLogs($userStore)}>Save Entries</button
+		disabled={$timelogStore.filter((row) => row.key.workCode == WorkCode.Unset).length > 0}
+		on:click={async () => {
+			await timelogStore.submitLogs($userStore);
+			timelogStore.getNewLogs($userStore);
+			notificationStore.addNew('Entries saved', 1000);
+		}}>Save Entries</button
 	>
 	<button
 		class="border hover:border-black p-1 bg-slate-200 hover:bg-transparent rounded m-2"
+		disabled={$timelogStore.filter((row) => row.key.workCode == WorkCode.Unset).length > 0}
 		on:click={() => {
 			showModal = true;
 		}}>Submit For Review</button

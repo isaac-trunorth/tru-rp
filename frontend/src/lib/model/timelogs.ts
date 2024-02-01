@@ -8,6 +8,14 @@ export enum Status {
     Submitted = "Submitted",
 }
 
+export enum WorkCode {
+    '' = '',
+    Unset = "Unset",
+    Meetings = "Meetings",
+    SoftwareDev = "SoftwareDev",
+    Checkout = "Checkout",
+}
+
 interface HoursWorked {
     hoursWorked: number,
     submitStatus: Status,
@@ -15,9 +23,8 @@ interface HoursWorked {
 
 export interface TimeEntry extends HoursWorked {
     id: number,
-    jobNumber: number,
-    jobDescription: string,
-    workCode: number,
+    jobId: number,
+    workCode: WorkCode,
     employeeId: number,
     dateOfWork: string,
 }
@@ -68,15 +75,13 @@ export class EntryField {
     }
 }
 
-export type TimeCardKey = { date: Date, projectNumber: number, workCode: number };
+export type TimeCardKey = { date: Date, projectId: number, workCode: WorkCode };
 export type TimeCardStore = TimeCardRow[];
 export class TimeCardRow {
     key: TimeCardKey;
-    name: string;
     entries: EntryField[];
-    constructor(name: string, key: TimeCardKey) {
+    constructor(key: TimeCardKey) {
         this.key = key;
-        this.name = name;
         this.entries = [];
         const monday = getMondayFromDate(key.date);
         for (let i = 0; i < 7; i++) {
@@ -112,9 +117,8 @@ export function convertTimeEntries(entries: TimeEntry[]): TimeCardStore {
         const groupedCodes = groupBy(grouped[key], (val) => val.workCode);
         Object.keys(groupedCodes).forEach(codeKey => {
             const newRow: TimeCardRow = new TimeCardRow(
-                groupedCodes[codeKey][0].jobDescription,
                 {
-                    projectNumber: groupedCodes[codeKey][0].jobNumber,
+                    projectId: groupedCodes[codeKey][0].jobId,
                     workCode: groupedCodes[codeKey][0].workCode,
                     date: week,
                 }

@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { WorkCodesIndexer } from '$lib/model/general';
-	import { Status, TimeCardRow, UiStatus } from '$lib/model/timelogs';
+	import { Status, UiStatus } from '$lib/model/timelogs';
+	import { projects } from '$lib/stores/projects';
 	import type { User } from '$lib/model/users';
-	import { userStore, managerStore } from '$lib/stores/user';
+	import { userStore } from '$lib/stores/user';
+	import { managerStore } from '$lib/stores/manager';
 	import { getDate, getMonday } from '$lib/utilities/utilities';
 	import { onMount } from 'svelte';
 	import check from '$lib/assets/check.png';
 	import minus from '$lib/assets/minus.png';
 	import Modal from './modal.svelte';
+	import { notificationStore } from '$lib/stores/notifications';
 	let showModal = false;
 	const now = new Date();
+	let user: User;
 	let date: string = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now
 		.getDate()
 		.toString()
@@ -36,13 +40,13 @@
 	let selected: string;
 
 	onMount(() => {
-		managerStore.fetchEmployees($userStore);
+		managerStore.fetchEmployees($userStore.userId);
 	});
 
 	function getTimecard() {
 		if (selected == 'Select Employee for review') return;
-		const user: User = $managerStore.employees.filter((row) => row.name == selected)[0];
-		managerStore.fetchTimecard(user.id);
+		user = $managerStore.employees.filter((row) => row.name == selected)[0];
+		managerStore.fetchTimecard(user.id, $userStore);
 	}
 
 	function markAllApproved() {
@@ -59,8 +63,9 @@
 	}
 
 	async function approveHours() {
-		await managerStore.approveHours($userStore, $managerStore.currentTimecard);
+		await managerStore.approveHours(user.id, $managerStore.currentTimecard, $userStore);
 		showModal = false;
+		notificationStore.addNew('Approval complete', 1000);
 	}
 </script>
 
@@ -89,10 +94,10 @@
 		{#each $managerStore.currentTimecard.filter((row) => row.key.date.toDateString() == monday.toDateString()) as row}
 			<tr>
 				<td class="border border-slate-800">
-					{row.name}
+					{$projects.filter((proj) => proj.id == row.key.projectId)[0].jobDescription}
 				</td>
 				<td class="border border-slate-800">
-					{WorkCodesIndexer[row.key.workCode]}
+					{row.key.workCode}
 				</td>
 				{#each Array(7) as _, i}
 					{#if row.entries[i].info.submitStatus == Status.Approved}

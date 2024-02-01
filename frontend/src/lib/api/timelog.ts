@@ -1,12 +1,13 @@
 import { Status, UiStatus, TimeCardRow, type TimeCardStore, type TimeEntry, type IdList } from '$lib/model/timelogs';
+import type { Token } from '$lib/model/users';
 import { formatDate } from '$lib/utilities/utilities';
-const url = "http://localhost:4000";
+export const url = "http://localhost:4000";
 const timelogs = 'timelogs';
 
-export async function getTimeLogs(user: number): Promise<TimeEntry[]> {
+export async function getTimeLogs(user: number, auth: Token): Promise<TimeEntry[]> {
     const res = await fetch(url + "/" + timelogs + "/" + user.toString(), {
         method: 'GET',
-        headers: [['Authorization', 'test']],
+        headers: [['Authorization', auth.tokenText]],
     })
     const asJson: TimeEntry[] = await res.json();
     return asJson;
@@ -16,7 +17,7 @@ function dateToString(date: Date) {
     return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
 }
 
-export async function submitTimelogs(logs: TimeCardStore, user: number) {
+export async function submitTimelogs(logs: TimeCardStore, user: Token) {
     const newLogs: TimeEntry[] = [];
     const updateLogs: TimeEntry[] = [];
     const deleteLogs: IdList = { ids: [] };
@@ -25,10 +26,9 @@ export async function submitTimelogs(logs: TimeCardStore, user: number) {
             if (hour.status == UiStatus.New && hour.info.hoursWorked > 0) {
                 newLogs.push({
                     id: 0,
-                    jobNumber: log.key.projectNumber,
-                    jobDescription: log.name,
-                    workCode: parseInt(log.key.workCode.toString()),
-                    employeeId: user,
+                    jobId: log.key.projectId,
+                    workCode: log.key.workCode,
+                    employeeId: user.userId,
                     dateOfWork: dateToString(hour.date),
                     hoursWorked: hour.info.hoursWorked,
                     submitStatus: hour.info.submitStatus,
@@ -37,10 +37,9 @@ export async function submitTimelogs(logs: TimeCardStore, user: number) {
             else if (hour.status == UiStatus.Changed && hour.info.hoursWorked > 0) {
                 updateLogs.push({
                     id: hour.id,
-                    jobNumber: log.key.projectNumber,
-                    jobDescription: log.name,
-                    workCode: parseInt(log.key.workCode.toString()),
-                    employeeId: user,
+                    jobId: log.key.projectId,
+                    workCode: log.key.workCode,
+                    employeeId: user.userId,
                     dateOfWork: dateToString(hour.date),
                     hoursWorked: hour.info.hoursWorked,
                     submitStatus: hour.info.submitStatus,
@@ -56,7 +55,7 @@ export async function submitTimelogs(logs: TimeCardStore, user: number) {
         const body = JSON.stringify(newLogs);
         await fetch(url + "/" + timelogs, {
             method: 'POST',
-            headers: [['Authorization', 'test'], ['content-type', 'application/json']],
+            headers: [['Authorization', user.tokenText], ['content-type', 'application/json']],
             body,
         });
     }
@@ -65,24 +64,22 @@ export async function submitTimelogs(logs: TimeCardStore, user: number) {
         const updatedLogs = JSON.stringify(updateLogs);
         await fetch(url + "/" + timelogs, {
             method: 'PUT',
-            headers: [['Authorization', 'test'], ['content-type', 'application/json']],
+            headers: [['Authorization', user.tokenText], ['content-type', 'application/json']],
             body: updatedLogs,
         });
     }
     // delete:
     if (deleteLogs.ids.length > 0) {
-        console.log("deleted:");
-        console.log(deleteLogs);
         const deleted = JSON.stringify(deleteLogs);
         await fetch(url + "/" + timelogs, {
             method: 'DELETE',
-            headers: [['Authorization', 'test'], ['content-type', 'application/json']],
+            headers: [['Authorization', user.tokenText], ['content-type', 'application/json']],
             body: deleted,
         });
     }
 }
 
-export async function approveTimelogs(user: number, logs: TimeCardRow[]) {
+export async function approveTimelogs(user: number, logs: TimeCardRow[], auth: Token) {
     const approved: IdList = { ids: [] };
     const changedTls: TimeEntry[] = [];
     logs.forEach((row) => {
@@ -90,9 +87,8 @@ export async function approveTimelogs(user: number, logs: TimeCardRow[]) {
             if (entry.info.submitStatus == Status.Approved) approved.ids.push(entry.id)
             else if (entry.status == UiStatus.Changed) changedTls.push({
                 id: entry.id,
-                jobNumber: row.key.projectNumber,
-                jobDescription: row.name,
-                workCode: parseInt(row.key.workCode.toString()),
+                jobId: row.key.projectId,
+                workCode: row.key.workCode,
                 employeeId: user,
                 dateOfWork: formatDate(entry.date),
                 hoursWorked: entry.info.hoursWorked,
@@ -103,7 +99,7 @@ export async function approveTimelogs(user: number, logs: TimeCardRow[]) {
     const body = JSON.stringify(approved);
     const res = await fetch(url + "/" + timelogs + "/approve", {
         method: 'PUT',
-        headers: [['Authorization', 'test'], ['content-type', 'application/json']],
+        headers: [['Authorization', auth.tokenText], ['content-type', 'application/json']],
         body,
     })
     // update:
@@ -111,7 +107,7 @@ export async function approveTimelogs(user: number, logs: TimeCardRow[]) {
         const updatedLogs = JSON.stringify(changedTls);
         await fetch(url + "/" + timelogs, {
             method: 'PUT',
-            headers: [['Authorization', 'test'], ['content-type', 'application/json']],
+            headers: [['Authorization', auth.tokenText], ['content-type', 'application/json']],
             body: updatedLogs,
         });
     }
