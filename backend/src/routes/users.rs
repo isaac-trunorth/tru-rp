@@ -1,4 +1,5 @@
 use axum::{
+    body::Body,
     extract::{path, Path, State},
     Json,
 };
@@ -35,7 +36,9 @@ pub async fn create_user(
     let pwd = hash_password(&payload.password);
     let new_user = users::ActiveModel {
         id: NotSet,
-        name: Set(payload.name),
+        first_name: Set(payload.first_name),
+        last_name: Set(payload.last_name),
+        user_name: Set(payload.user_name),
         password: Set(pwd),
         manager_id: Set(payload.manager_id),
         access_level: Set(payload.access_level),
@@ -47,7 +50,7 @@ pub async fn create_user(
 }
 pub async fn login(state: State<AppState>, Json(payload): Json<users::Model>) -> String {
     let from_db = users::Entity::find()
-        .filter(users::Column::Name.eq(payload.name))
+        .filter(users::Column::UserName.eq(payload.user_name))
         .one(&state.db)
         .await;
     if from_db.is_err() {
@@ -68,6 +71,21 @@ pub async fn login(state: State<AppState>, Json(payload): Json<users::Model>) ->
 }
 pub async fn logout() {}
 
+pub async fn update_password(state: State<AppState>, Json(payload): Json<users::Model>) -> String {
+    let user_pwd = hash_password(&payload.password);
+    let active: users::ActiveModel = users::ActiveModel {
+        id: Set(payload.id),
+        manager_id: NotSet,
+        first_name: NotSet,
+        last_name: NotSet,
+        user_name: NotSet,
+        password: Set(user_pwd),
+        access_level: NotSet,
+    };
+    active.update(&state.db).await.unwrap();
+    return "Success".into();
+}
+
 pub async fn get_users(state: State<AppState>) -> Json<Vec<users::Model>> {
     let users = users::Entity::find().all(&state.db).await.unwrap();
     users.into()
@@ -83,4 +101,17 @@ pub async fn get_users_by_manager(
         .await
         .unwrap();
     users.into()
+}
+pub async fn update_user(state: State<AppState>, Json(user): Json<users::Model>) -> String {
+    let active: users::ActiveModel = users::ActiveModel {
+        id: Set(user.id),
+        manager_id: Set(user.manager_id),
+        first_name: Set(user.first_name),
+        last_name: Set(user.last_name),
+        user_name: Set(user.user_name),
+        password: NotSet,
+        access_level: Set(user.access_level),
+    };
+    active.update(&state.db).await.unwrap();
+    return "Success".into();
 }

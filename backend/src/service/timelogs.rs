@@ -21,8 +21,11 @@ pub async fn get_timelogs(
     if let Some(status) = &filters.status {
         logs = logs.filter(time_entries::Column::SubmitStatus.eq(*status));
     };
+    // only allow week_end_date filter or start to end filter
     if let Some(date) = filters.week_end_date {
         let (begin_date, end_date) = get_date_range(date);
+        logs = logs.filter(time_entries::Column::DateOfWork.between(begin_date, end_date));
+    } else if let (Some(begin_date), Some(end_date)) = (filters.start_date, filters.end_date) {
         logs = logs.filter(time_entries::Column::DateOfWork.between(begin_date, end_date));
     }
 

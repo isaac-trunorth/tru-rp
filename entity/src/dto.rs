@@ -6,6 +6,9 @@ pub struct TimelogRequest {
     pub user_id: Option<i32>,
     pub manager_id: Option<String>,
     pub week_end_date: Option<chrono::NaiveDate>,
+    pub start_date: Option<chrono::NaiveDate>,
+    pub end_date: Option<chrono::NaiveDate>,
+    pub project_id: Option<i32>,
     pub status: Option<Status>,
 }
 

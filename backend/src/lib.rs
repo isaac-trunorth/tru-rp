@@ -16,7 +16,10 @@ use routes::{
         get_timelogs::get_timelogs,
         update_timelogs::{mark_approved, update_timelog},
     },
-    users::{assign_manager, create_user, get_users, get_users_by_manager, login, logout},
+    users::{
+        assign_manager, create_user, get_users, get_users_by_manager, login, logout,
+        update_password, update_user,
+    },
 };
 use tower_http::cors::CorsLayer;
 
@@ -58,11 +61,13 @@ fn create_router(app_state: AppState) -> Router {
         .route("/timelogs", post(create_timelog))
         .route("/timelogs", put(update_timelog))
         .route("/timelogs", delete(soft_delete_timelog))
-        .route("/timelogs/:user_id", get(get_timelogs))
+        .route("/timelogs", get(get_timelogs))
         .route("/timelogs/approve", put(mark_approved))
         .route("/users", get(get_users))
         .route("/users/by_manager/:manager_id", get(get_users_by_manager))
         .route("/users", post(create_user))
+        .route("/users/update_pwd", post(update_password))
+        .route("/users", put(update_user))
         .route("/users/login", post(login))
         .route("/users/logout", post(logout))
         .route("/users/setmanager", post(assign_manager))

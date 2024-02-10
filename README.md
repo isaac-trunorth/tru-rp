@@ -25,3 +25,14 @@ A resource management tool for TruNorth.
 
 - `podman machine start && podman start f3e4ae0f7156`
 - `sea-orm-cli generate entity -o .\entity\src\entities --with-serde both --model-extra-attributes 'serde(rename_all = "camelCase")'`
+
+# Final Q's
+- User struct - first name, last name, username?
+- Projects - include customer? other misc?
+- Approval - include approver ID? if so, use separate table?
+- Status Paid - allow mark of payout for accounting purposes
+- Access levels - 1=users, 2=business admin, 3=manager, 99=owner?
+
+# Future Work
+- Add user roles
+    - could restrict available WorkCodes based upon role

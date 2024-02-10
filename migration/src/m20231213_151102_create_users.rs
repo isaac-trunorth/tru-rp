@@ -8,7 +8,9 @@ pub enum Users {
     Users,
     Id,
     ManagerId,
-    Name,
+    FirstName,
+    LastName,
+    UserName,
     Password,
     AccessLevel,
 }
@@ -29,7 +31,14 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Users::ManagerId).integer().not_null())
-                    .col(ColumnDef::new(Users::Name).string().unique_key().not_null())
+                    .col(ColumnDef::new(Users::FirstName).string().not_null())
+                    .col(ColumnDef::new(Users::LastName).string().not_null())
+                    .col(
+                        ColumnDef::new(Users::UserName)
+                            .string()
+                            .unique_key()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Users::Password).string().not_null())
                     .col(
                         ColumnDef::new(Users::AccessLevel)

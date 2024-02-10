@@ -1,6 +1,6 @@
-use crate::m20231214_151102_create_table::Projects;
+use crate::m20231214_151102_create_projects::Projects;
 
-use super::m20231213_151102_create_table::Users;
+use super::m20231213_151102_create_users::Users;
 use sea_orm_migration::{
     prelude::*,
     sea_orm::{EnumIter, Iterable},
