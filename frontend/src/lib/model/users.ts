@@ -3,7 +3,9 @@ import type { TimeCardRow } from "$lib/model/timelogs";
 export interface User {
     id: number,
     managerId: number,
-    name: string,
+    firstName: string,
+    lastName: string,
+    userName: string,
     password: string,
     accessLevel: number,
 }

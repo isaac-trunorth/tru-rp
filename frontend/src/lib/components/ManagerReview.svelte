@@ -3,7 +3,7 @@
 	import { Status, UiStatus } from '$lib/model/timelogs';
 	import { projects } from '$lib/stores/projects';
 	import type { User } from '$lib/model/users';
-	import { userStore } from '$lib/stores/user';
+	import { authStore } from '$lib/stores/user';
 	import { managerStore } from '$lib/stores/manager';
 	import { getDate, getMonday } from '$lib/utilities/utilities';
 	import { onMount } from 'svelte';
@@ -40,13 +40,13 @@
 	let selected: string;
 
 	onMount(() => {
-		managerStore.fetchEmployees($userStore.userId);
+		managerStore.fetchEmployees($authStore);
 	});
 
 	function getTimecard() {
 		if (selected == 'Select Employee for review') return;
-		user = $managerStore.employees.filter((row) => row.name == selected)[0];
-		managerStore.fetchTimecard(user.id, $userStore);
+		user = $managerStore.employees.filter((row) => row.userName == selected)[0];
+		managerStore.fetchTimecard(user.id, $authStore);
 	}
 
 	function markAllApproved() {
@@ -63,7 +63,7 @@
 	}
 
 	async function approveHours() {
-		await managerStore.approveHours(user.id, $managerStore.currentTimecard, $userStore);
+		await managerStore.approveHours($authStore, $managerStore.currentTimecard);
 		showModal = false;
 		notificationStore.addNew('Approval complete', 1000);
 	}
@@ -77,7 +77,7 @@
 	<select bind:value={selected} on:change={getTimecard}>
 		<option>Select Employee for Review</option>
 		{#each $managerStore.employees as reportee}
-			<option>{reportee.name}</option>
+			<option>{reportee.userName}</option>
 		{/each}
 	</select>
 	<table class="border-collapse border border-slate-800 table-auto">

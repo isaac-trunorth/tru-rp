@@ -6,7 +6,11 @@
 
 <div class="z-50">
 	{#each $notificationStore as notification ($notificationStore.indexOf(notification))}
-		<div class="bg-yellow-200 rounded flex justify-center" animate:flip transition:fly={{ y: 30 }}>
+		<div
+			class="bg-yellow-200 rounded flex justify-center font-bold"
+			animate:flip
+			transition:fly={{ y: 30 }}
+		>
 			{notification}
 		</div>
 	{/each}

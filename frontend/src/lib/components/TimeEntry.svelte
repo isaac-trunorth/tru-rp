@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Status, TimeCardRow, UiStatus, WorkCode } from '$lib/model/timelogs';
 	import { timelogStore } from '$lib/stores/timelog';
-	import { userStore } from '$lib/stores/user';
-	import { getDate, getMonday } from '$lib/utilities/utilities';
+	import { authStore } from '$lib/stores/user';
+	import { getDate, getMonday, getProjectId } from '$lib/utilities/utilities';
 	import { onMount } from 'svelte';
 	import { projects } from '$lib/stores/projects';
 	import { WorkCodesIndexer } from '$lib/model/general';
@@ -29,8 +29,8 @@
 		);
 
 	onMount(async () => {
-		await projects.getProjects($userStore);
-		await timelogStore.getNewLogs($userStore);
+		await projects.getProjects($authStore);
+		await timelogStore.getNewLogs($authStore);
 	});
 
 	function monitor(projectName: string) {
@@ -43,7 +43,8 @@
 				new TimeCardRow({
 					date: monday,
 					projectId: nextProject.id,
-					workCode: WorkCode.Unset
+					workCode: WorkCode.Unset,
+					userId: $authStore.userId
 				})
 			);
 			newProject = 'Add project';
@@ -51,12 +52,17 @@
 	}
 
 	async function removeRow(row: TimeCardRow) {
-		await timelogStore.removeLog(row, $userStore);
+		await timelogStore.removeLog(row, $authStore);
 		notificationStore.addNew('Logs removed');
 	}
 	function addRow(row: TimeCardRow) {
 		const { date, projectId } = row.key;
-		const newRow = new TimeCardRow({ date, projectId, workCode: WorkCode.Unset });
+		const newRow = new TimeCardRow({
+			date,
+			projectId,
+			workCode: WorkCode.Unset,
+			userId: $authStore.userId
+		});
 		timelogStore.addLog(newRow);
 	}
 	async function finalHourSubmission() {
@@ -68,7 +74,7 @@
 				if (entry.status != UiStatus.New) entry.status = UiStatus.Changed;
 			});
 		});
-		await timelogStore.submitLogs($userStore);
+		await timelogStore.submitLogs($authStore);
 		notificationStore.addNew('Submission successfull', 1000);
 		showModal = false;
 	}
@@ -95,7 +101,7 @@
 					on:mouseenter={() => (showButtons = true)}
 					on:mouseleave={() => (showButtons = false)}
 				>
-					{`${$projects.filter((proj) => proj.id == row.key.projectId)[0].jobNumber} - ${
+					{`${getProjectId($projects, row.key.projectId)} - ${
 						$projects.filter((proj) => proj.id == row.key.projectId)[0].jobDescription
 					}`}
 					{#if showButtons}
@@ -113,16 +119,14 @@
 					{#if row.key.workCode != WorkCode.Unset && row.key.workCode.toString() != ''}
 						{row.key.workCode}
 					{:else}
-						<input
+						<select
 							bind:value={row.key.workCode}
 							on:click={() => (row.key.workCode = WorkCode[''])}
-							list="workCodes"
-						/>
-						<datalist id="workCodes">
+						>
 							{#each WorkCodesIndexer as workOption}
 								<option>{workOption}</option>
 							{/each}
-						</datalist>
+						</select>
 					{/if}
 				</td>
 				{#each Array(7) as _, i}
@@ -176,8 +180,8 @@
 		class="border hover:border-black p-1 bg-slate-200 hover:bg-transparent rounded m-2"
 		disabled={$timelogStore.filter((row) => row.key.workCode == WorkCode.Unset).length > 0}
 		on:click={async () => {
-			await timelogStore.submitLogs($userStore);
-			timelogStore.getNewLogs($userStore);
+			await timelogStore.submitLogs($authStore);
+			timelogStore.getNewLogs($authStore);
 			notificationStore.addNew('Entries saved', 1000);
 		}}>Save Entries</button
 	>

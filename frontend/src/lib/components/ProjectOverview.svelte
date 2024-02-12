@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type Project } from '$lib/model/general';
 	import { projects } from '$lib/stores/projects';
-	import { userStore } from '$lib/stores/user';
+	import { authStore } from '$lib/stores/user';
 	const newProject: Project = {
 		id: 0,
 		jobNumber: 999000,
@@ -9,7 +9,7 @@
 		jobActive: true
 	};
 	async function createNewProject() {
-		await projects.createNew(newProject, $userStore);
+		await projects.createNew(newProject, $authStore);
 	}
 </script>
 

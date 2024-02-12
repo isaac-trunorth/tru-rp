@@ -1,4 +1,4 @@
-import { createUser, login } from "$lib/api/users";
+import { createUser, login, updatePassword } from "$lib/api/users";
 import type { Token, User } from "$lib/model/users";
 import { writable } from "svelte/store";
 
@@ -10,7 +10,7 @@ const blankUser: Token = {
 }
 const { subscribe, set, update } = writable<Token>(blankUser);
 
-export const userStore = {
+export const authStore = {
     subscribe,
     update,
     set,
@@ -21,8 +21,12 @@ export const userStore = {
     logout: () => {
         set(blankUser);
     },
+    updatePassword: async (user: User, auth: Token) => {
+        const result = await updatePassword(user, auth);
+        return result;
+    },
     createNewUser: async (user: User, auth: Token) => {
         const newUser = await createUser(user, auth);
-        return `New user created: ID# ${newUser.id} - ${newUser.name}`;
+        return `New user created: ID# ${newUser.id} - ${newUser.userName}`;
     }
 }

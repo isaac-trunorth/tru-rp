@@ -10,14 +10,16 @@ pub async fn get_timelogs(
     db: &DatabaseConnection,
 ) -> Vec<entity::time_entries::Model> {
     let mut logs = time_entries::Entity::find();
-
     // add the optional filters
     if let Some(user_id) = &filters.user_id {
         logs = logs.filter(time_entries::Column::EmployeeId.eq(*user_id));
     }
-    if let Some(manager_id) = &filters.manager_id {
-        logs = logs.filter(time_entries::Column::EmployeeId.eq(manager_id));
+    if let Some(project_id) = &filters.project_id {
+        logs = logs.filter(time_entries::Column::JobId.eq(*project_id));
     }
+    if let Some(work_code) = &filters.work_code {
+        logs = logs.filter(time_entries::Column::WorkCode.eq(*work_code));
+    };
     if let Some(status) = &filters.status {
         logs = logs.filter(time_entries::Column::SubmitStatus.eq(*status));
     };

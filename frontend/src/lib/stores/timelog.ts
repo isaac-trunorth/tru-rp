@@ -24,7 +24,7 @@ export const timelogStore = {
     },
     getNewLogs: async (auth: Token, user?: number) => {
         if (!user) user = auth.userId;
-        const newLogs = await getTimeLogs(user, auth);
+        const newLogs = await getTimeLogs({ userId: user }, auth);
         set(convertTimeEntries(newLogs));
     },
     submitLogs: async (auth: Token) => {
@@ -49,7 +49,7 @@ export const timelogStore = {
             }
         });
         submitTimelogs([log], auth);
-        const newLogs = await getTimeLogs(auth.userId, auth);
+        const newLogs = await getTimeLogs({ userId: auth.userId }, auth);
         set(convertTimeEntries(newLogs));
     }
 }

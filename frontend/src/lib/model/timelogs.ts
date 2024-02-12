@@ -36,11 +36,22 @@ type Optional<Type> = {
 interface ConcreteRequest {
     userId: number,
     managerId: number,
-    weekEndDate: Date,
+    weekEndDate: string,
     status: Status,
+    startDate: string,
+    endDate: string,
+    projectId: number,
+    workCode: WorkCode,
 }
 
 export type TimelogRequest = Optional<ConcreteRequest>;
+
+export const FilterOptions = {
+    all: 'All',
+    byProject: 'By Project',
+    byUser: 'By User',
+    byWorkType: 'By Type of Work',
+}
 
 export interface IdList {
     ids: Array<number>,
@@ -75,7 +86,7 @@ export class EntryField {
     }
 }
 
-export type TimeCardKey = { date: Date, projectId: number, workCode: WorkCode };
+export type TimeCardKey = { date: Date, projectId: number, workCode: WorkCode, userId: number };
 export type TimeCardStore = TimeCardRow[];
 export class TimeCardRow {
     key: TimeCardKey;
@@ -121,6 +132,7 @@ export function convertTimeEntries(entries: TimeEntry[]): TimeCardStore {
                     projectId: groupedCodes[codeKey][0].jobId,
                     workCode: groupedCodes[codeKey][0].workCode,
                     date: week,
+                    userId: groupedCodes[codeKey][0].employeeId,
                 }
             );
             // array is codes in a given week for a given project

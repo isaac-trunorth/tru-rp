@@ -1,11 +1,16 @@
-import { Status, UiStatus, TimeCardRow, type TimeCardStore, type TimeEntry, type IdList } from '$lib/model/timelogs';
+import { Status, UiStatus, TimeCardRow, type TimeCardStore, type TimeEntry, type IdList, type TimelogRequest } from '$lib/model/timelogs';
 import type { Token } from '$lib/model/users';
 import { formatDate } from '$lib/utilities/utilities';
 export const url = "http://localhost:4000";
 const timelogs = 'timelogs';
 
-export async function getTimeLogs(user: number, auth: Token): Promise<TimeEntry[]> {
-    const res = await fetch(url + "/" + timelogs + "/" + user.toString(), {
+export async function getTimeLogs(request: TimelogRequest, auth: Token): Promise<TimeEntry[]> {
+    const requestParams = new URLSearchParams();
+    Object.keys(request).forEach(key => {
+        let typedKey = key as unknown as keyof TimelogRequest;
+        if (!!request[typedKey]) requestParams.append(key, request[typedKey]!.toString());
+    });
+    const res = await fetch(url + "/" + timelogs + '?' + requestParams.toString(), {
         method: 'GET',
         headers: [['Authorization', auth.tokenText]],
     })
@@ -79,7 +84,7 @@ export async function submitTimelogs(logs: TimeCardStore, user: Token) {
     }
 }
 
-export async function approveTimelogs(user: number, logs: TimeCardRow[], auth: Token) {
+export async function approveTimelogs(logs: TimeCardRow[], auth: Token) {
     const approved: IdList = { ids: [] };
     const changedTls: TimeEntry[] = [];
     logs.forEach((row) => {
@@ -89,7 +94,7 @@ export async function approveTimelogs(user: number, logs: TimeCardRow[], auth: T
                 id: entry.id,
                 jobId: row.key.projectId,
                 workCode: row.key.workCode,
-                employeeId: user,
+                employeeId: row.key.userId,
                 dateOfWork: formatDate(entry.date),
                 hoursWorked: entry.info.hoursWorked,
                 submitStatus: entry.info.submitStatus,

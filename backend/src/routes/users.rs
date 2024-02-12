@@ -58,6 +58,7 @@ pub async fn login(state: State<AppState>, Json(payload): Json<users::Model>) ->
     };
     let from_db = from_db.unwrap().unwrap();
     let user_pwd = hash_password(&payload.password);
+    println!("{user_pwd}");
     if user_pwd != from_db.password {
         return "Invalid password".into();
     };

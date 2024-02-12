@@ -8,19 +8,6 @@ const exampleEmployees = [
     'John Doe',
     'Jane Doe',
 ]
-export function getEmployees(managerId: number): User[] {
-    const users: User[] = [];
-    for (let i = 0; i < 3; i++) {
-        users.push({
-            id: i,
-            managerId: managerId,
-            name: exampleEmployees[i],
-            password: "",
-            accessLevel: 1,
-        });
-    }
-    return users;
-}
 
 export async function login(user: User): Promise<Token> {
     const res = await fetch([url, 'login'].join("/"), {
@@ -38,6 +25,24 @@ export async function login(user: User): Promise<Token> {
     };
     return token;
 }
+export async function updatePassword(user: User, auth: Token): Promise<string> {
+    const res = await fetch([url, 'users', 'update_pwd'].join("/"), {
+        method: "POST",
+        headers: [['Authorization', auth.tokenText], ['content-type', 'application/json']],
+        body: JSON.stringify(user)
+    })
+    const body = await res.text();
+    return body;
+}
+
+export async function updateUser(user: User, auth: Token): Promise<String> {
+    const res = await fetch([url, 'users'].join("/"), {
+        method: "PUT",
+        headers: [['Authorization', auth.tokenText], ['content-type', 'application/json']],
+        body: JSON.stringify(user)
+    })
+    return await res.text();
+}
 
 export async function createUser(user: User, auth: Token): Promise<User> {
     const res = await fetch([url, 'users'].join("/"), {
@@ -46,5 +51,23 @@ export async function createUser(user: User, auth: Token): Promise<User> {
         body: JSON.stringify(user)
     })
     const body: User = await res.json();
+    return body;
+}
+
+export async function getUsers(auth: Token): Promise<User[]> {
+    const res = await fetch([url, 'users'].join("/"), {
+        method: "GET",
+        headers: [['Authorization', auth.tokenText], ['content-type', 'application/json']],
+    })
+    const body: User[] = await res.json();
+    return body;
+}
+
+export async function getManagersEmployees(auth: Token): Promise<User[]> {
+    const res = await fetch([url, 'users', 'by_manager', `${auth.userId}`].join("/"), {
+        method: "GET",
+        headers: [['Authorization', auth.tokenText], ['content-type', 'application/json']],
+    })
+    const body: User[] = await res.json();
     return body;
 }
